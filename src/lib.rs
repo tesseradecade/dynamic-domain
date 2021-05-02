@@ -1,7 +1,3 @@
-//! # Dynamic domain
-//! ...
-
-
 mod util;
 
 const EMPTY: char = '∅';
@@ -71,7 +67,7 @@ impl Domain<i32> {
                 right
             ) => {
 
-                match left.clone() {
+                match left {
 
                     Value::Included(i) => {
                         if secluded_value > i.clone() {
@@ -123,7 +119,7 @@ impl Domain<i32> {
                 right
             ) => {
 
-                match right.clone() {
+                match right {
 
                     Value::Included(i) => {
                         if secluded_value < i.clone() {
@@ -210,21 +206,24 @@ mod tests {
 
     #[test]
     fn test_manual_domain() {
-        let domain = Domain::Domain(Value::Included(5), Value::Secluded(10));
+        let domain = Domain::Domain(
+            Value::Included(5),
+            Value::Secluded(10)
+        );
         assert_eq!(domain.repr(), "[5,10)".to_string())
     }
 
     #[test]
     fn test_new() {
         let domain = Domain::new();
-        println!("{}", domain.repr());
+        assert_eq!(domain.repr(), "(-∞,∞)".to_string())
     }
 
     #[test]
     fn test_gt() {
         let mut domain = Domain::new()
             .gt(Value::Secluded(5));
-        println!("{}", domain.repr());
+        assert_eq!(domain.repr(), "(5,∞)".to_string())
     }
 
     #[test]
@@ -232,7 +231,7 @@ mod tests {
         let mut domain = Domain::new()
             .lt(Value::Secluded(5))
             .gt(Value::Included(3))
-            .gt(Value::Secluded(2));
-        println!("{}", domain.repr());
+            .gt(Value::Secluded(1));
+        assert_eq!(domain.repr(), "(2,5)".to_string())
     }
 }
