@@ -1,0 +1,9 @@
+[package]
+name = "dynamic_domain"
+readme = "readme.md"
+description = "Dynamic domain implementation for linear algebra purposes"
+version = "0.1.0"
+authors = ["timoniq"]
+edition = "2018"
+
+[dependencies]
