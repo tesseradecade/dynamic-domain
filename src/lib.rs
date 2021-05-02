@@ -178,7 +178,7 @@ impl Domain<i32> {
             Domain::Domain(left, right) => {
                 format!(
 
-                    "{},{}",
+                    "{};{}",
 
                     match left {
                         Value::Included(i) => format!("[{}", i),
@@ -210,28 +210,28 @@ mod tests {
             Value::Included(5),
             Value::Secluded(10)
         );
-        assert_eq!(domain.repr(), "[5,10)".to_string())
+        assert_eq!(domain.repr(), "[5;10)".to_string())
     }
 
     #[test]
     fn test_new() {
         let domain = Domain::new();
-        assert_eq!(domain.repr(), "(-∞,∞)".to_string())
+        assert_eq!(domain.repr(), "(-∞;∞)".to_string())
     }
 
     #[test]
     fn test_gt() {
         let mut domain = Domain::new()
             .gt(Value::Secluded(5));
-        assert_eq!(domain.repr(), "(5,∞)".to_string())
+        assert_eq!(domain.repr(), "(5;∞)".to_string())
     }
 
     #[test]
     fn test_lt() {
         let mut domain = Domain::new()
-            .lt(Value::Secluded(5))
-            .gt(Value::Included(3))
+            .lt(Value::Included(5))
+            .gt(Value::Secluded(3))
             .gt(Value::Secluded(1));
-        assert_eq!(domain.repr(), "(2,5)".to_string())
+        assert_eq!(domain.repr(), "(2;5)".to_string())
     }
 }
