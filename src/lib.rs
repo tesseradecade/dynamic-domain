@@ -198,6 +198,95 @@ impl Domain<i32> {
         }
     }
 
+    /// Generates integers by the domain,
+    /// sends integers to receiver
+    /// ```
+    /// use dynamic_domain::{Domain, Value};
+    /// let domain = Domain::new()
+    ///     .gt(Value::Secluded(5));
+    /// fn rec(n: i32) { println!("Some stuff with {}", n); }
+    /// domain.generate(rec);
+    /// ```
+    pub fn generate(&self, receiver: fn(i32)) {
+
+        match self {
+            Domain::Union(
+                domains
+            ) => {
+                for domain in domains {
+                    domain.generate(receiver)
+                }
+            },
+
+            Domain::Domain(l, r) => {
+                let mut from_l = true;
+                let mut from_r = false;
+
+                match l.clone() {
+                    Value::Infinite => {
+                        from_l = false;
+                    },
+                    _ => (),
+                }
+
+                match r.clone() {
+                    Value::Infinite => {
+                        from_r = false;
+                    },
+                    _ => from_r = true
+                }
+
+                if !from_l && !from_r {
+                    return;
+                }
+
+                let (mut v, b, f) = if from_l {
+
+                    let v = match l {
+                        Value::Included(n) => *n,
+                        Value::Secluded(n) => (*n) + 1,
+                        _ => 0,
+                    };
+
+                    let b = match r {
+                        Value::Included(n) => Some(*n),
+                        Value::Secluded(n) => Some((*n) - 1),
+                        _ => None,
+                    };
+
+                    (v, b, (|n: i32| -> i32 { n + 1 }) as fn(i32) -> i32)
+
+                } else {
+
+                    let b = match l {
+                        Value::Included(n) => Some(*n),
+                        Value::Secluded(n) => Some((*n) + 1),
+                        _ => None,
+                    };
+
+                    let v = match r {
+                        Value::Included(n) => *n,
+                        Value::Secluded(n) => (*n) - 1,
+                        _ => 0,
+                    };
+
+                    (v, b, (|n: i32| -> i32 { n - 1 }) as fn(i32) -> i32)
+                };
+
+                loop {
+                    receiver(v);
+
+                    if let Some(bound) = b {
+                        if v == bound { break; }
+                    }
+
+                    v = f(v)
+                }
+
+            }
+            Domain::None => (),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -232,6 +321,21 @@ mod tests {
             .lt(Value::Included(5))
             .gt(Value::Secluded(3))
             .gt(Value::Secluded(1));
-        assert_eq!(domain.repr(), "(2;5)".to_string())
+        assert_eq!(domain.repr(), "(3;4)".to_string())
+    }
+
+    #[test]
+    fn test_generate() {
+
+        fn rec(n: i32) {
+            assert!(n > 5);
+            assert!(n < 10);
+        }
+
+        let mut domain = Domain::new()
+            .gt(Value::Secluded(5))
+            .lt(Value::Secluded(10));
+
+        domain.generate(rec);
     }
 }
