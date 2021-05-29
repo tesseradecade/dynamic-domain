@@ -58,7 +58,7 @@ impl Domain<i32> {
     /// ```
     pub fn gt(&self, value: Value<i32>) -> Self {
 
-        let secluded_value = match util::convert_to_secluded(value) {
+        let secluded_value = match util::convert_to_secluded(value, true) {
             Some(i) => i,
             None => return Domain::None,
         };
@@ -110,7 +110,7 @@ impl Domain<i32> {
     /// ```
     pub fn lt(&self, value: Value<i32>) -> Self {
 
-        let secluded_value = match util::convert_to_secluded(value) {
+        let secluded_value = match util::convert_to_secluded(value, false) {
             Some(i) => i,
             None => return Domain::None,
         };
@@ -324,7 +324,7 @@ mod tests {
             .lt(Value::Included(5))
             .gt(Value::Secluded(3))
             .gt(Value::Secluded(1));
-        assert_eq!(domain.repr(), "(3;4)".to_string())
+        assert_eq!(domain.repr(), "(3;6)".to_string())
     }
 
     #[test]
