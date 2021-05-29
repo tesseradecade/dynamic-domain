@@ -58,3 +58,25 @@ fn main() {
     println!("{}", domain.repr()); // ∅
 }
 ```
+
+## generate
+
+```rust
+use dynamic_domain::{Domain, Value};
+
+fn receiver(i: i32, context: ()) {
+    println!("{}", i);
+}
+
+fn main() {
+    let domain = Domain::Domain(
+        Value::Included(5),
+        Value::Secluded(10)
+    );
+    domain.generate(receiver, ());
+}
+```
+
+## todo
+
+* constraint
