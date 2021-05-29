@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_and_test:
+    name: ${{ matrix.os }} ${{ matrix.version }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        version: ["stable", "nightly"]

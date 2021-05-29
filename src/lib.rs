@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 mod util;
 
 const EMPTY: char = '∅';
@@ -28,8 +30,8 @@ pub enum Domain<T> {
     /// Union inside Union is prohibited
     Union(Vec<Domain<T>>),
 
-    /// Left value is the starting border (in most implementations default to -infinity)
-    /// Right value is the ending border (in most implementations default to infinity)
+    /// First value is the starting border (in most implementations default to -infinity)
+    /// Second value is the ending border (in most implementations default to infinity)
     Domain(Value<T>, Value<T>),
 
     /// Empty set
@@ -203,18 +205,19 @@ impl Domain<i32> {
     /// ```
     /// use dynamic_domain::{Domain, Value};
     /// let domain = Domain::new()
-    ///     .gt(Value::Secluded(5));
-    /// fn rec(n: i32) { println!("Some stuff with {}", n); }
-    /// domain.generate(rec);
+    ///     .gt(Value::Secluded(5))
+    ///     .lt(Value::Included(10));
+    /// fn rec(n: i32, c: ()) { println!("Some stuff with {}", n); }
+    /// domain.generate(rec, ());
     /// ```
-    pub fn generate(&self, receiver: fn(i32)) {
+    pub fn generate<Context: Clone>(&self, receiver: fn(i32, Context), context: Context) {
 
         match self {
             Domain::Union(
                 domains
             ) => {
                 for domain in domains {
-                    domain.generate(receiver)
+                    domain.generate(receiver, context.clone())
                 }
             },
 
@@ -274,7 +277,7 @@ impl Domain<i32> {
                 };
 
                 loop {
-                    receiver(v);
+                    receiver(v, context.clone());
 
                     if let Some(bound) = b {
                         if v == bound { break; }
@@ -327,7 +330,7 @@ mod tests {
     #[test]
     fn test_generate() {
 
-        fn rec(n: i32) {
+        fn rec(n: i32, c: ()) {
             assert!(n > 5);
             assert!(n < 10);
         }
@@ -336,6 +339,8 @@ mod tests {
             .gt(Value::Secluded(5))
             .lt(Value::Secluded(10));
 
-        domain.generate(rec);
+        assert_eq!(domain.clone().repr(), "(5;10)".to_string());
+
+        domain.generate(rec, ());
     }
 }
