@@ -207,17 +207,17 @@ impl Domain<i32> {
     /// let domain = Domain::new()
     ///     .gt(Value::Secluded(5))
     ///     .lt(Value::Included(10));
-    /// fn rec(n: i32, c: ()) { println!("Some stuff with {}", n); }
-    /// domain.generate(rec, ());
+    /// fn rec(n: i32, c: &()) { println!("Some stuff with {}", n); }
+    /// domain.generate(rec, &());
     /// ```
-    pub fn generate<Context: Clone>(&self, receiver: fn(i32, Context), context: Context) {
+    pub fn generate<Context>(&self, receiver: fn(i32, &Context), context: &Context) {
 
         match self {
             Domain::Union(
                 domains
             ) => {
                 for domain in domains {
-                    domain.generate(receiver, context.clone())
+                    domain.generate(receiver, context)
                 }
             },
 
@@ -277,7 +277,7 @@ impl Domain<i32> {
                 };
 
                 loop {
-                    receiver(v, context.clone());
+                    receiver(v, context);
 
                     if let Some(bound) = b {
                         if v == bound { break; }
@@ -330,7 +330,7 @@ mod tests {
     #[test]
     fn test_generate() {
 
-        fn rec(n: i32, c: ()) {
+        fn rec(n: i32, c: &()) {
             assert!(n > 5);
             assert!(n < 10);
         }
@@ -341,6 +341,6 @@ mod tests {
 
         assert_eq!(domain.clone().repr(), "(5;10)".to_string());
 
-        domain.generate(rec, ());
+        domain.generate(rec, &());
     }
 }

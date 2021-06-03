@@ -64,7 +64,7 @@ fn main() {
 ```rust
 use dynamic_domain::{Domain, Value};
 
-fn receiver(i: i32, context: ()) {
+fn receiver(i: i32, context: &()) {
     println!("{}", i);
 }
 
@@ -73,7 +73,7 @@ fn main() {
         Value::Included(5),
         Value::Secluded(10)
     );
-    domain.generate(receiver, ());
+    domain.generate(receiver, &());
 }
 ```
 
